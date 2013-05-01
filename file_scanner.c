@@ -1,21 +1,51 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "index.h"
+#include <string.h>
+
 /**
-   1. Takes the filename containing
-   a list of files to scan, then for each
-   file found, writes the name to a bounded buffer.
+ * A simple bounded buffer struct
+ * to store the filenames for 
+ * word indexing.
+ **/
+struct bounded_buffer {
+  char** buffer;
+  int buf_size;
+};
+//global variable to be shared
+struct bounded_buffer* bnd_buf;
 
-   With respect to the buffer, it is a 'producer'.
-*/
 int file_scanner(char* filename) {
-
-  FILE* the_file = open(filename, "r");
-  unsigned int line_num = 0;
-  while(getc(the_file) != NULL) {
-	while(strtok(the_string,"\n \t")) {
-
-	  if(word_is_valid(the_string)) {
-		insert_into_index(string, filename, line_num);
-	  }
-	  line_num++;
-	}
+  
+  char buffer[MAXPATH];
+  FILE * file;
+  //count line numbers in file list
+  file = fopen(filename, "r");
+  int line_number = 0;
+  while (!feof(file)) {
+    fgets(buffer, MAXPATH,file);
+    line_number = line_number+1;
+    //printf("Line: %d\n", line_number);
   }
+  fclose(file);
+  //initialize struct to hold file list
+  bnd_buf = (struct bounded_buffer *)malloc(sizeof(struct bounded_buffer));
+  bnd_buf->buffer = malloc(line_number*sizeof(char*)*MAXPATH);
+  bnd_buf->buf_size = line_number;
+  char temp_buffer[MAXPATH][line_number];
+  //fill buffer with list of file names
+  file = fopen(filename, "r");
+  int i = 0;
+  while (!feof(file)) {
+    fgets(temp_buffer[i], MAXPATH, file);
+    bnd_buf->buffer[i] = temp_buffer[i];
+    //printf("Word: %s\n", bnd_buf->buffer[i]);
+    i++;
+  }
+  fclose(file);
+  
+  return 0;
 }
+
+
+
