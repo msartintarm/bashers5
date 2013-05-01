@@ -30,7 +30,17 @@ int file_indexer(bounded_buffer* filenames) {
 	over 3 chars, alphanumeric values only
 	return 0 if false, nonzero if true
 */
-int word_is_valid(char* the_string) {}
+int word_is_valid(char* the_string) {
+  if(strlen(the_string) <= 3) return 0;
+  int i;
+  for(i=0; i < strlen(the_string); i++){
+    int c = (int)the_string[i]; //char at index
+    //if char at index is outside of the ranges of ascii alphanumeric
+    //characters, the word is invalid
+    if(c < 48 || (c > 57 && c < 65) || (c > 90 && c < 97) || c > 122) return 0;
+  }
+  return 1;
+}
 
 /**
    3. Reads a string from standard input
