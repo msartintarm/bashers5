@@ -15,8 +15,11 @@ struct bounded_buffer {
 //global variable to be shared
 struct bounded_buffer* bnd_buf;
 
+unsigned int full = 0;
+
 int file_scanner(char* filename) {
-  
+  char * word;
+  char * saveptr;
   char buffer[MAXPATH];
   FILE * file;
   //count line numbers in file list
@@ -32,20 +35,29 @@ int file_scanner(char* filename) {
   bnd_buf = (struct bounded_buffer *)malloc(sizeof(struct bounded_buffer));
   bnd_buf->buffer = malloc(line_number*sizeof(char*)*MAXPATH);
   bnd_buf->buf_size = line_number;
+  //printf("buffSize %d\n", bnd_buf->buf_size);
   char temp_buffer[MAXPATH][line_number];
   //fill buffer with list of file names
   file = fopen(filename, "r");
   int i = 0;
   while (!feof(file)) {
     fgets(temp_buffer[i], MAXPATH, file);
-    bnd_buf->buffer[i] = temp_buffer[i];
-    //printf("Word: %s\n", bnd_buf->buffer[i]);
+    if((word = strtok_r(temp_buffer[i], " \n\t", &saveptr))){
+      bnd_buf->buffer[i] = word;
+      //printf("Word: %s\n", bnd_buf->buffer[i]);
+    }
+    else {
+      //subtract from file line total
+      bnd_buf->buf_size -= 1;
+    }
     i++;
   }
   fclose(file);
-  
+  full = 1;
   return 0;
 }
+
+
 
 
 

@@ -1,3 +1,11 @@
+#include <file_scanner.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "index.h"
+#include <string.h>
+
+int word_is_valid(char* the_string);
+
 /**
    2. Takes a buffer containing filenames as input, and goes
    through it, adding all words to index
@@ -7,23 +15,39 @@
 
    There can be more than one indexer running at one time.
 */
-int file_indexer(bounded_buffer* filenames) {
+int file_indexer() {
 
-  lock();
-  char* filename = filenames->next_file;
-
-  FILE* the_file = open(filename, "r");
-  unsigned int line_num = 0;
-  while(getc(the_file) != NULL) {
-	while(strtok(the_string,"\n \t")) {
-
-	  if(word_is_valid(the_string)) {
-		insert_into_index(string, filename, line_num);
-	  }
-	  line_num++;
-	}
-  }
-}
+  //init_index();
+  FILE * file;
+  int i;
+  for(i = 0; i < bnd_buf->buf_size; i++){
+    //printf("buff %s\n", bnd_buf->buffer[i]);
+    file = fopen(bnd_buf->buffer[i], "r");
+    if(file != NULL){
+    //if((file = fopen(bnd_buf->buffer[i], "r"))){
+      while (!feof(file)) {
+        int line_number = 0;
+        char * word;
+        char * saveptr;
+        char buffer[MAXPATH];
+        fgets(buffer, sizeof(buffer),file);
+        word = strtok_r(buffer, " \n\t-_!@#$%^&*;()_+=,./<>?", &saveptr);
+        while (word != NULL){
+         if(word_is_valid(word)){
+          printf("Word is: %s\n", word);
+          //insert_into_index(word, file_name, line_number);
+         }
+         word = strtok_r(NULL, " \n\t-_!@#$%^&*;()_+=,./<>?",&saveptr);
+        }
+        line_number = line_number+1;
+       } //end not eof
+       fclose(file);
+     } //end if not null
+    
+   } //end for
+ 
+  return 0;
+} //end function
 
 /** 
 	helper function for file indexer
