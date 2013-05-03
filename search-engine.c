@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h> // access
 #include <pthread.h>
-//#include "bounded_buffer.h"
+#include "bounded_buffer.h"
 #include "index.h"
 #include "file_indexer.h"
 #include "file_scanner.h"
@@ -34,6 +34,8 @@ void error_out(int errnum) {
   }
 }
 
+void exit_main() { buff_free(); }
+
 int buf_head = 0;
 int buf_tail = 0;
 const int SIZE = 10;
@@ -44,8 +46,6 @@ int empty() { buf_tail++; buf_tail %= SIZE; return buf_tail; }
 int num_elements() { return (buf_head > buf_tail)?
 	buf_head - buf_tail: SIZE + buf_head - buf_tail; }
 
-int scanning_done = 0;
-
 /**
  * POSIX thread functions to call
  *
@@ -53,9 +53,8 @@ int scanning_done = 0;
  */
 void* scanning_function(void* the_file) {  
 
-  if(scanning_done) { pthread_exit(0); }
-
-  if(num_elements() > SIZE/2) {
+  int scanning_done = 0;
+  while(!scanning_done) {
 	//	pthread_mutex_lock(&fill_mutex);
 	if(file_scanner((char*)the_file) == 1) scanning_done = 1;
 	//	pthread_mutex_unlock(&fill_mutex);
@@ -105,17 +104,21 @@ int main(int argc, char* argv[]) {
 
   pthread_create(&scanning_thread, NULL, 
 				 scanning_function, (void*)argv[2]);
+  atexit(exit_main);
+
+  pthread_join(scanning_thread, NULL);
+
   for(i = 0; i < num_threads; ++i) {
     pthread_create(&indexing_thread[i], NULL, 
 				   indexing_function, NULL);
+    pthread_join(indexing_thread[i], NULL);  
   }
+  for(i = 0; i < num_threads; ++i) {
+	//    pthread_join(indexing_thread[i], NULL);
+  }
+
   pthread_create(&searching_thread, NULL,
 				 searching_function, NULL);
-
-  pthread_join(scanning_thread, NULL);
-  for(i = 0; i < num_threads; ++i) {
-    pthread_join(indexing_thread[i], NULL);
-  }
   pthread_join(searching_thread, NULL);
 
   exit(0);

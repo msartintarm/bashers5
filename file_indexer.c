@@ -3,6 +3,7 @@
 #include <string.h>
 #include "index.h"
 #include "file_scanner.h"
+#include "bounded_buffer.h"
 
 int word_is_valid(char* the_string);
 
@@ -15,39 +16,38 @@ int word_is_valid(char* the_string);
 
    There can be more than one indexer running at one time.
 */
+
 int file_indexer() {
 
   FILE * file;
-  char* filename;
-  int i;
+  char* filename = malloc(sizeof(char)*MAXPATH);
   int line_number = 0;
-  for(i = 0; i < bnd_buf->buf_size; i++){
-    //printf("buff %s\n", bnd_buf->buffer[i]);
-    file = fopen(bnd_buf->buffer[i], "r");
-    if(file == NULL){ return(1); }
-    filename = strdup(bnd_buf->buffer[i]);
-    while (!feof(file)) {
-      char * word;
-      char * saveptr;
-      char buffer[MAXPATH];
-      fgets(buffer, sizeof(buffer),file);
-      word = strtok_r(buffer, " \n\t", &saveptr);
-      while (word != NULL){
+
+  filename = remove_filename(filename);
+
+  file = fopen(filename, "r");
+  if(file == NULL){ return(1); }
+  char buffer[MAXPATH];
+
+  while (!feof(file)) {
+	char * word;
+	char * saveptr;
+	fgets(buffer, sizeof(buffer),file);
+	word = strtok_r(buffer, " \n\t", &saveptr);
+	while (word != NULL){
 	if(word_is_valid(word)){
-          //printf("Word: %s %s %d\n", word, filename, line_number);
-          insert_into_index(word, filename, line_number);
+	  //printf("Word: %s %s %d\n", word, filename, line_number);
+	  insert_into_index(word, filename, line_number);
 	}
 	word = strtok_r(NULL, " \n\t",&saveptr);
-      }
-      //move down a line and increment
-      line_number = line_number+1;
-    } //end not eof
-    line_number = 0; //reset line counter; new file
-    fclose(file);
-    
-  } //end for
+	}
+	//move down a line and increment
+	line_number = line_number+1;
+  } //end not eof
+  line_number = 0; //reset line counter; new file
+  fclose(file);
  
-  return 0;
+return 0;
 } //end function
 
 /** 

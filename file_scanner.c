@@ -3,17 +3,6 @@
 #include <string.h>
 #include "index.h"
 #include "bounded_buffer.h"
-/**
- * A simple bounded buffer struct
- * to store the filenames for 
- * word indexing.
- **/
-struct bounded_buffer {
-  char** buffer;
-  int buf_size;
-};
-//global variable to be shared
-struct bounded_buffer* bnd_buf;
 
 char * word;
 char * saveptr;
@@ -23,8 +12,6 @@ int line_number;
 //printf("buffSize %d\n", bnd_buf->buf_size);
 char temp_buffer[MAXPATH];
 //fill buffer with list of file names
-
-Bounded_buffer buff;
 
 int file_scanner(char* filename) {
 
@@ -43,19 +30,17 @@ int file_scanner(char* filename) {
 	rewind(file);
 	//initialize struct to hold file list
 
-	buff_init(&buff, line_number);
+	buff_init(line_number);
   }
 
-  // if we are at the of file, close
-  if(feof(file)) {   
-
+  if(fgets(temp_buffer, MAXPATH, file) == NULL) {
 	fclose(file);
 	return 1; 
   }
 
-  fgets(temp_buffer, MAXPATH, file);
+  temp_buffer[strlen(temp_buffer)-1] = '\0';
+  add_filename(temp_buffer);
 
-  temp_buffer[strlen(temp_buffer)-1] = '0';
-  add_filename(&buff, temp_buffer);
+  // if we are at the of file, close
   return 0;
 }

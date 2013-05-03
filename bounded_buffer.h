@@ -13,29 +13,29 @@ typedef struct {
 /**
  * Initializes an empty buffer
  **/
-void buff_init(Bounded_buffer *buffer, int size);
+void buff_init(int size);
 
 //bookeeping function
-void buff_free(Bounded_buffer *buffer);
+void buff_free();
 
 //return true if buffer is full
-int is_full(Bounded_buffer *buffer);
+int is_full();
 
 //return true if buffer is empty
-int is_empty(Bounded_buffer *buffer);
+int is_empty();
 
 /**
  * Adds filename from buffer.
  * FIFO
  * If full return error code 1
  **/
-int add_filename(Bounded_buffer *buffer, char* fname);
+int add_filename(char* fname);
 
 /**
  * Removes the filename from the buffer.
  * FIFO
  * @return filename
  **/
-char* remove_filename(Bounded_buffer *buffer, char* fname);
+char* remove_filename(char* fname);
 
 
