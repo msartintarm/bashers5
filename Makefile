@@ -1,7 +1,7 @@
 CXX=gcc
 RM=rm -f
 INSTRUCT_SRCS = index.c
-SRCS = test.c
+SRCS = search-engine.c
 OBJS = $(SRCS:.c=.o) $(INSTRUCT_SRCS:.c=.o)
 INSTRUCT_CPPFLAGS = -Wall -g
 CPPFLAGS = -Wall -Werror -g
