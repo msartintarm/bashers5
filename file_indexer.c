@@ -1,8 +1,8 @@
-#include <file_scanner.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "index.h"
 #include <string.h>
+#include "index.h"
+#include "file_scanner.h"
 
 int word_is_valid(char* the_string);
 

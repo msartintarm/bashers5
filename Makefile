@@ -1,14 +1,14 @@
 CXX=gcc
 RM=rm -f
 INSTRUCT_SRCS = index.c
-SRCS = search-engine.c
+SRCS = search-engine.c file_scanner.c file_indexer.c search_interface.c bounded_buffer.c
 OBJS = $(SRCS:.c=.o) $(INSTRUCT_SRCS:.c=.o)
 INSTRUCT_CPPFLAGS = -Wall -g
 CPPFLAGS = -Wall -Werror -g
 LDFLAGS = -Wall -Werror -lm
 #LDLIBS=$(shell root-config --libs) -pthread
 LDLIBS = -pthread
-PROG=test
+PROG=search-engine
 
 all: prog
 

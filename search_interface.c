@@ -1,6 +1,10 @@
+#include <stdio.h>
+
 int search_interface() {
-  if(found ==true) {
-	printf("FOUND: %s %d\n", file_name, line_num);
+  if(0 == 0) {
+	printf("FOUND: \n");//%s %d\n", file_name, line_num);
   } else {
 	printf("Word not found.\n");
+  }
+  return 0;
 }

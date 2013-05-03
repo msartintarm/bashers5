@@ -10,8 +10,6 @@
 
 //pthread_mutex_lock(&mymutex);
 //pthread_mutex_unlock(&mymutex);
-pthread_mutex_t mymutex = PTHREAD_MUTEX_INITIALIZER;
-
 /**
  * If one of the multithreaded methods has failed,
  * 'gracefully' terminate everything else and exit.
@@ -19,33 +17,63 @@ pthread_mutex_t mymutex = PTHREAD_MUTEX_INITIALIZER;
 void error_out(int errnum) {
   switch(errnum) {
   case 0:
-    fprintf(stderr, "Usage: ./search-enginer [num-indexer-threads] [list-of-files.txt]\n");
+    fprintf(stderr, "Usage: ./search-engine [num-indexer-threads] [list-of-files.txt]\n");
     exit(1);
   case 1:
-    fprintf(stderr, "File scanner failed.\n");
+    fprintf(stderr, "File does not exist.\n");
     exit(1);
   case 2:
+    fprintf(stderr, "File scanner failed.\n");
+    exit(1);
+  case 3:
     fprintf(stderr, "File indexer failed.\n");
     exit(1);
-  case 3: default:
+  case 4: default:
     fprintf(stderr, "Search interface failed.\n");
     exit(1);
   }
 }
 
+int buf_head = 0;
+int buf_tail = 0;
+const int SIZE = 10;
+pthread_mutex_t fill_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+int fill() { buf_head++; buf_head %= SIZE; return buf_head; }
+int empty() { buf_tail++; buf_tail %= SIZE; return buf_tail; }
+int num_elements() { return (buf_head > buf_tail)?
+	buf_head - buf_tail: SIZE + buf_head - buf_tail; }
+
+int scanning_done = 0;
 
 /**
  * POSIX thread functions to call
  *
  * We will modify these to use atomic variables and / or use the bounded buffer
  */
-void* scanning_function() {  
+void* scanning_function(void* the_file) {  
+
+  if(scanning_done) { pthread_exit(0); }
+
+  if(num_elements() > SIZE/2) {
+	//	pthread_mutex_lock(&fill_mutex);
+	if(file_scanner((char*)the_file) == 1) scanning_done = 1;
+	//	pthread_mutex_unlock(&fill_mutex);
+  }
+
   pthread_exit(0);// (void*) file_scanner("the_file"));
 }
+
 void* indexing_function() {
+
+  file_indexer();
+  empty();
+
   pthread_exit(0);// (void*) file_indexer());
 }
+
 void* searching_function() {
+  search_interface();
   pthread_exit(0);// (void*) search_interface());
 }
 /**
@@ -63,7 +91,7 @@ int main(int argc, char* argv[]) {
   // - not a valid thread count
   if(num_threads < 1) { error_out(0); }
   // - file to read from doesn't exist
-  if(access(argv[2], F_OK) == -1) { error_out(0); }
+  if(access(argv[2], R_OK) == -1) { error_out(1); }
 
   //  index_search_results_t* results;
   init_index();
@@ -75,11 +103,14 @@ int main(int argc, char* argv[]) {
 
   int i;
 
-  pthread_create(&scanning_thread, NULL, scanning_function, NULL);
+  pthread_create(&scanning_thread, NULL, 
+				 scanning_function, (void*)argv[2]);
   for(i = 0; i < num_threads; ++i) {
-    pthread_create(&indexing_thread[i], NULL, indexing_function, NULL);
+    pthread_create(&indexing_thread[i], NULL, 
+				   indexing_function, NULL);
   }
-  pthread_create(&searching_thread, NULL, searching_function, NULL);
+  pthread_create(&searching_thread, NULL,
+				 searching_function, NULL);
 
   pthread_join(scanning_thread, NULL);
   for(i = 0; i < num_threads; ++i) {

@@ -16,6 +16,7 @@ typedef struct {
  * Initializes an empty buffer
  **/
 void buff_init(Bounded_buffer *buffer, int size) {
+
   buffer->count = 0;
   buffer->filenames = malloc(size*sizeof(char*)*MAXPATH); //MAXPATH = 511
   buffer->size  = size;
