@@ -30,16 +30,17 @@ int file_indexer() {
   char buffer[MAXPATH];
 
   while (!feof(file)) {
+
 	char * word;
 	char * saveptr;
 	fgets(buffer, sizeof(buffer),file);
 	word = strtok_r(buffer, " \n\t", &saveptr);
 	while (word != NULL){
-	if(word_is_valid(word)){
-	  //printf("Word: %s %s %d\n", word, filename, line_number);
-	  insert_into_index(word, filename, line_number);
-	}
-	word = strtok_r(NULL, " \n\t",&saveptr);
+	  if(word_is_valid(word)){
+		//printf("%s %s %d\n", filename, word, line_number);
+		insert_into_index(word, filename, line_number);
+	  }
+	  word = strtok_r(NULL, " \n\t",&saveptr);
 	}
 	//move down a line and increment
 	line_number = line_number+1;
@@ -66,16 +67,3 @@ int word_is_valid(char* the_string) {
   }
   return 1;
 }
-
-/**
-   3. Reads a string from standard input
-   and outputs the indices it appears in
-
-   Prog should exit when user enters ctrl+D
-
-   Also runs on a seperate thread
-
-   Basic search: search for a single word across all files
-
-   Advanced search: search for a word in one file
-*/

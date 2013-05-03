@@ -1,0 +1,5 @@
+When youre done using the array 
+you must remember to free each of
+ the pointers youve allocated That is 
+loop through the array calling free 
+on each of its elements and then freearray as well.

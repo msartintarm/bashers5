@@ -1,0 +1,4 @@
+My examples are not checking 
+for NULL returns from malloc
+ you really should do that though
+you will crash if you try to use a NULL pointer

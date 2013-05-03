@@ -55,7 +55,7 @@ int add_filename(char* fname) {
   int rc = 0;
   int end = (buffer->start + buffer->count) % buffer->size;
   strcpy(buffer->filenames[end], fname); 
-  printf("%s, %d\n", buffer->filenames[end],
+  printf("adding %s at pos %d\n", buffer->filenames[end],
 		 end);
  if (buffer->count == buffer->size) {
     fprintf(stderr, "Error: can't add to a full buffer\n");
@@ -73,7 +73,7 @@ int add_filename(char* fname) {
  **/
 char* remove_filename(char* fname) {
   fname = buffer->filenames[buffer->start];
-  printf("%s, %d\n", buffer->filenames[buffer->start],
+  printf("removing %s at pos %d\n", buffer->filenames[buffer->start],
 		 buffer->start);
   buffer->start = (buffer->start + 1) % buffer->size;
   --buffer->count; //decrement count
