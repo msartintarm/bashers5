@@ -9,6 +9,9 @@ struct bounded_buffer {
   int buf_size;
 };
 
+/**
+ * Input: a list containing files to scan
+ */
 int file_scanner(char* filename);
 
 //global variable to be shared

@@ -17,7 +17,6 @@ int word_is_valid(char* the_string);
 */
 int file_indexer() {
 
-  init_index();
   FILE * file;
   char* filename;
   int i;
@@ -25,29 +24,28 @@ int file_indexer() {
   for(i = 0; i < bnd_buf->buf_size; i++){
     //printf("buff %s\n", bnd_buf->buffer[i]);
     file = fopen(bnd_buf->buffer[i], "r");
-    if(file != NULL){
-      filename = strdup(bnd_buf->buffer[i]);
-      while (!feof(file)) {
-        char * word;
-        char * saveptr;
-        char buffer[MAXPATH];
-        fgets(buffer, sizeof(buffer),file);
-        word = strtok_r(buffer, " \n\t", &saveptr);
-        while (word != NULL){
-         if(word_is_valid(word)){
+    if(file == NULL){ return(1); }
+    filename = strdup(bnd_buf->buffer[i]);
+    while (!feof(file)) {
+      char * word;
+      char * saveptr;
+      char buffer[MAXPATH];
+      fgets(buffer, sizeof(buffer),file);
+      word = strtok_r(buffer, " \n\t", &saveptr);
+      while (word != NULL){
+	if(word_is_valid(word)){
           //printf("Word: %s %s %d\n", word, filename, line_number);
           insert_into_index(word, filename, line_number);
-         }
-         word = strtok_r(NULL, " \n\t",&saveptr);
-        }
-        //move down a line and increment
-        line_number = line_number+1;
-       } //end not eof
-       line_number = 0; //reset line counter; new file
-       fclose(file);
-     } //end if not null
+	}
+	word = strtok_r(NULL, " \n\t",&saveptr);
+      }
+      //move down a line and increment
+      line_number = line_number+1;
+    } //end not eof
+    line_number = 0; //reset line counter; new file
+    fclose(file);
     
-   } //end for
+  } //end for
  
   return 0;
 } //end function
