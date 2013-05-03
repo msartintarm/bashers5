@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
 #include "index.h"
  
 /**
@@ -22,7 +23,12 @@ void buff_init(int size) {
 
   buffer = malloc(sizeof(Bounded_buffer));
   buffer->count = 0;
-  buffer->filenames = malloc(size*sizeof(char*)*MAXPATH); //MAXPATH = 511
+  buffer->filenames = malloc(size*sizeof(char*)); //MAXPATH = 511
+  int i;
+  for(i = 0; i < size; ++i) {
+	buffer->filenames[i] = malloc(sizeof(char)); //MAXPATH = 511
+  }
+
   buffer->size  = size;
   buffer->start = 0;
 }
@@ -48,8 +54,10 @@ int is_empty() {
 int add_filename(char* fname) {
   int rc = 0;
   int end = (buffer->start + buffer->count) % buffer->size;
-  buffer->filenames[end] = fname;
-  if (buffer->count == buffer->size) {
+  strcpy(buffer->filenames[end], fname); 
+  printf("%s, %d\n", buffer->filenames[end],
+		 end);
+ if (buffer->count == buffer->size) {
     fprintf(stderr, "Error: can't add to a full buffer\n");
     rc = 1;
   }
@@ -65,8 +73,9 @@ int add_filename(char* fname) {
  **/
 char* remove_filename(char* fname) {
   fname = buffer->filenames[buffer->start];
+  printf("%s, %d\n", buffer->filenames[buffer->start],
+		 buffer->start);
   buffer->start = (buffer->start + 1) % buffer->size;
   --buffer->count; //decrement count
   return fname;
 }
-

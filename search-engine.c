@@ -65,8 +65,9 @@ void* scanning_function(void* the_file) {
 
 void* indexing_function() {
 
-  file_indexer();
-  empty();
+  while(!is_empty()) {
+	file_indexer();
+  }
 
   pthread_exit(0);// (void*) file_indexer());
 }

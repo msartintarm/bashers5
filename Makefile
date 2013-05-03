@@ -15,6 +15,9 @@ all: prog
 prog: $(OBJS)
 	gcc $(LDFLAGS) -o $(PROG) $(OBJS) $(LDLIBS) 
 
+run: prog
+	./$(PROG) 10 files.txt
+
 valgrind: $(OBJS)
 	gcc $(LDFLAGS)  -o $(PROG) $(OBJS) $(LDLIBS) 
 	valgrind --tool=memcheck --track-origins=yes \
