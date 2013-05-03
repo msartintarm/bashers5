@@ -6,7 +6,7 @@ OBJS = $(SRCS:.c=.o) $(INSTRUCT_SRCS:.c=.o)
 INSTRUCT_CPPFLAGS = -Wall -g
 CPPFLAGS = -Wall -Werror -g
 LDFLAGS = -Wall -Werror -lm
-#LDLIBS=$(shell root-config --libs) -pthread
+#LDLIBS=$(shell root-config --libs) -pthreadx
 LDLIBS = -pthread
 PROG=search-engine
 
