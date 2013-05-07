@@ -103,11 +103,11 @@ create_hashtable(unsigned int minsize,
 int 
 hashtable_insert(struct hashtable *h, void *k, void *v);
 
-#define DEFINE_HASHTABLE_INSERT(fnname, keytype, valuetype) \
-int fnname (struct hashtable *h, keytype *k, valuetype *v) \
-{ \
-    return hashtable_insert(h,k,v); \
-}
+#define DEFINE_HASHTABLE_INSERT(fnname, keytype, valuetype)		\
+  int fnname (struct hashtable *h, keytype *k, valuetype *v)	\
+  {																\
+    return hashtable_insert(h,k,v);								\
+  }
 
 /*****************************************************************************
  * hashtable_search
@@ -122,10 +122,10 @@ void *
 hashtable_search(struct hashtable *h, void *k);
 
 #define DEFINE_HASHTABLE_SEARCH(fnname, keytype, valuetype) \
-valuetype * fnname (struct hashtable *h, keytype *k) \
-{ \
-    return (valuetype *) (hashtable_search(h,k)); \
-}
+  valuetype * fnname (struct hashtable *h, keytype *k)		\
+  {															\
+    return (valuetype *) (hashtable_search(h,k));			\
+  }
 
 /*****************************************************************************
  * hashtable_remove
@@ -140,10 +140,10 @@ void * /* returns value */
 hashtable_remove(struct hashtable *h, void *k);
 
 #define DEFINE_HASHTABLE_REMOVE(fnname, keytype, valuetype) \
-valuetype * fnname (struct hashtable *h, keytype *k) \
-{ \
-    return (valuetype *) (hashtable_remove(h,k)); \
-}
+  valuetype * fnname (struct hashtable *h, keytype *k)		\
+  {															\
+    return (valuetype *) (hashtable_remove(h,k));			\
+  }
 
 
 /*****************************************************************************
@@ -174,19 +174,19 @@ hashtable_destroy(struct hashtable *h, int free_values);
 /*****************************************************************************/
 struct entry
 {
-    void *k, *v;
-    unsigned int h;
-    struct entry *next;
+  void *k, *v;
+  unsigned int h;
+  struct entry *next;
 };
 
 struct hashtable {
-    unsigned int tablelength;
-    struct entry **table;
-    unsigned int entrycount;
-    unsigned int loadlimit;
-    unsigned int primeindex;
-    unsigned int (*hashfn) (void *k);
-    int (*eqfn) (void *k1, void *k2);
+  unsigned int tablelength;
+  struct entry **table;
+  unsigned int entrycount;
+  unsigned int loadlimit;
+  unsigned int primeindex;
+  unsigned int (*hashfn) (void *k);
+  int (*eqfn) (void *k1, void *k2);
 };
 
 /*****************************************************************************/
@@ -197,15 +197,15 @@ hash(struct hashtable *h, void *k);
 /* indexFor */
 static inline unsigned int
 indexFor(unsigned int tablelength, unsigned int hashvalue) {
-    return (hashvalue % tablelength);
+  return (hashvalue % tablelength);
 };
 
 /* Only works if tablelength == 2^N */
 /*static inline unsigned int
-indexFor(unsigned int tablelength, unsigned int hashvalue)
-{
-    return (hashvalue & (tablelength - 1u));
-}
+  indexFor(unsigned int tablelength, unsigned int hashvalue)
+  {
+  return (hashvalue & (tablelength - 1u));
+  }
 */
 
 /*****************************************************************************/
@@ -218,18 +218,18 @@ indexFor(unsigned int tablelength, unsigned int hashvalue)
 
 
 /*
-Credit for primes table: Aaron Krowne
- http://br.endernet.org/~akrowne/
- http://planetmath.org/encyclopedia/GoodHashTablePrimes.html
+  Credit for primes table: Aaron Krowne
+  http://br.endernet.org/~akrowne/
+  http://planetmath.org/encyclopedia/GoodHashTablePrimes.html
 */
 static const unsigned int primes[] = {
-53, 97, 193, 389,
-769, 1543, 3079, 6151,
-12289, 24593, 49157, 98317,
-196613, 393241, 786433, 1572869,
-3145739, 6291469, 12582917, 25165843,
-50331653, 100663319, 201326611, 402653189,
-805306457, 1610612741
+  53, 97, 193, 389,
+  769, 1543, 3079, 6151,
+  12289, 24593, 49157, 98317,
+  196613, 393241, 786433, 1572869,
+  3145739, 6291469, 12582917, 25165843,
+  50331653, 100663319, 201326611, 402653189,
+  805306457, 1610612741
 };
 const unsigned int prime_table_length = sizeof(primes)/sizeof(primes[0]);
 const float max_load_factor = 0.65;
@@ -240,184 +240,217 @@ create_hashtable(unsigned int minsize,
                  unsigned int (*hashf) (void*),
                  int (*eqf) (void*,void*))
 {
-    struct hashtable *h;
-    unsigned int pindex, size = primes[0];
-    /* Check requested hashtable isn't too large */
-    if (minsize > (1u << 30)) return NULL;
-    /* Enforce size as prime */
-    for (pindex=0; pindex < prime_table_length; pindex++) {
-        if (primes[pindex] > minsize) { size = primes[pindex]; break; }
-    }
-    h = (struct hashtable *)malloc(sizeof(struct hashtable));
-    if (NULL == h) return NULL; /*oom*/
-    h->table = (struct entry **)malloc(sizeof(struct entry*) * size);
-    if (NULL == h->table) { free(h); return NULL; } /*oom*/
-    memset(h->table, 0, size * sizeof(struct entry *));
-    h->tablelength  = size;
-    h->primeindex   = pindex;
-    h->entrycount   = 0;
-    h->hashfn       = hashf;
-    h->eqfn         = eqf;
-    h->loadlimit    = (unsigned int) ceil(size * max_load_factor);
-    return h;
+  struct hashtable *h;
+  unsigned int pindex, size = primes[0];
+  /* Check requested hashtable isn't too large */
+  if (minsize > (1u << 30)) return NULL;
+  /* Enforce size as prime */
+  for (pindex=0; pindex < prime_table_length; pindex++) {
+	if (primes[pindex] > minsize) { size = primes[pindex]; break; }
+  }
+  h = (struct hashtable *)malloc(sizeof(struct hashtable));
+  if (NULL == h) return NULL; /*oom*/
+  h->table = (struct entry **)malloc(sizeof(struct entry*) * size);
+  if (NULL == h->table) { free(h); return NULL; } /*oom*/
+  memset(h->table, 0, size * sizeof(struct entry *));
+  h->tablelength  = size;
+  h->primeindex   = pindex;
+  h->entrycount   = 0;
+  h->hashfn       = hashf;
+  h->eqfn         = eqf;
+  h->loadlimit    = (unsigned int) ceil(size * max_load_factor);
+  return h;
 }
 
 /*****************************************************************************/
 unsigned int
 hash(struct hashtable *h, void *k)
 {
-    /* Aim to protect against poor hash functions by adding logic here
-     * - logic taken from java 1.4 hashtable source */
-    unsigned int i = h->hashfn(k);
-    i += ~(i << 9);
-    i ^=  ((i >> 14) | (i << 18)); /* >>> */
-    i +=  (i << 4);
-    i ^=  ((i >> 10) | (i << 22)); /* >>> */
-    return i;
+  /* Aim to protect against poor hash functions by adding logic here
+   * - logic taken from java 1.4 hashtable source */
+  unsigned int i = h->hashfn(k);
+  i += ~(i << 9);
+  i ^=  ((i >> 14) | (i << 18)); /* >>> */
+  i +=  (i << 4);
+  i ^=  ((i >> 10) | (i << 22)); /* >>> */
+  return i;
 }
+
+pthread_rwlock_t table_lock = PTHREAD_RWLOCK_INITIALIZER;
+pthread_rwlock_t expand_lock = PTHREAD_RWLOCK_INITIALIZER;
 
 /*****************************************************************************/
 static int
 hashtable_expand(struct hashtable *h)
 {
-    /* Double the size of the table to accomodate more entries */
-    struct entry **newtable;
-    struct entry *e;
-    struct entry **pE;
-    unsigned int newsize, i, index;
-    /* Check we're not hitting max capacity */
-    if (h->primeindex == (prime_table_length - 1)) return 0;
-    newsize = primes[++(h->primeindex)];
 
-    newtable = (struct entry **)malloc(sizeof(struct entry*) * newsize);
-    if (NULL != newtable)
+  // bashers: we need to lock entire table to do this
+  if(pthread_rwlock_wrlock(&table_lock) != 0) return;
+  // and block other expand threads from executing this function
+  if(pthread_rwlock_trywrlock(&expand_lock) != 0) return;
+
+  // first, set a conditional blocking other threads from acquiring global rdwr lock
+  while(num_threads > 0) { pthread_cond_wait(&table_loaded, &table_lock); }
+
+  // next, wait for rdwr lock to become free
+  // multiple threads may try to expand at once. conditional will
+  //  ensure that only one will win - others will return.
+
+  /* Double the size of the table to accomodate more entries */
+  struct entry **newtable;
+  struct entry *e;
+  struct entry **pE;
+  unsigned int newsize, i, index;
+  /* Check we're not hitting max capacity */
+  if (h->primeindex == (prime_table_length - 1)) return 0;
+  newsize = primes[++(h->primeindex)];
+
+  newtable = (struct entry **)malloc(sizeof(struct entry*) * newsize);
+  if (NULL != newtable)
     {
-        memset(newtable, 0, newsize * sizeof(struct entry *));
-        /* This algorithm is not 'stable'. ie. it reverses the list
-         * when it transfers entries between the tables */
-        for (i = 0; i < h->tablelength; i++) {
-            while (NULL != (e = h->table[i])) {
-                h->table[i] = e->next;
-                index = indexFor(newsize,e->h);
-                e->next = newtable[index];
-                newtable[index] = e;
-            }
-        }
-        free(h->table);
-        h->table = newtable;
+	  memset(newtable, 0, newsize * sizeof(struct entry *));
+	  /* This algorithm is not 'stable'. ie. it reverses the list
+	   * when it transfers entries between the tables */
+	  for (i = 0; i < h->tablelength; i++) {
+		while (NULL != (e = h->table[i])) {
+		  h->table[i] = e->next;
+		  index = indexFor(newsize,e->h);
+		  e->next = newtable[index];
+		  newtable[index] = e;
+		}
+	  }
+	  free(h->table);
+	  h->table = newtable;
     }
-    /* Plan B: realloc instead */
-    else 
+  /* Plan B: realloc instead */
+  else 
     {
-        newtable = (struct entry **)
-                   realloc(h->table, newsize * sizeof(struct entry *));
-        if (NULL == newtable) { (h->primeindex)--; return 0; }
-        h->table = newtable;
-        memset(newtable[h->tablelength], 0, newsize - h->tablelength);
-        for (i = 0; i < h->tablelength; i++) {
-            for (pE = &(newtable[i]), e = *pE; e != NULL; e = *pE) {
-                index = indexFor(newsize,e->h);
-                if (index == i)
-                {
-                    pE = &(e->next);
-                }
-                else
-                {
-                    *pE = e->next;
-                    e->next = newtable[index];
-                    newtable[index] = e;
-                }
-            }
-        }
+	  newtable = (struct entry **)
+		realloc(h->table, newsize * sizeof(struct entry *));
+	  if (NULL == newtable) { (h->primeindex)--; return 0; }
+	  h->table = newtable;
+	  memset(newtable[h->tablelength], 0, newsize - h->tablelength);
+	  for (i = 0; i < h->tablelength; i++) {
+		for (pE = &(newtable[i]), e = *pE; e != NULL; e = *pE) {
+		  index = indexFor(newsize,e->h);
+		  if (index == i)
+			{
+			  pE = &(e->next);
+			}
+		  else
+			{
+			  *pE = e->next;
+			  e->next = newtable[index];
+			  newtable[index] = e;
+			}
+		}
+	  }
     }
-    h->tablelength = newsize;
-    h->loadlimit   = (unsigned int) ceil(newsize * max_load_factor);
-    return -1;
+  h->tablelength = newsize;
+  h->loadlimit   = (unsigned int) ceil(newsize * max_load_factor);
+  return -1;
 }
 
 /*****************************************************************************/
 unsigned int
 hashtable_count(struct hashtable *h)
 {
-    return h->entrycount;
+  return h->entrycount;
 }
+
+int is_loaded(struct hashtable *h) { return (h->entrycount) >= h->loadlimit); }
 
 /*****************************************************************************/
 int
 hashtable_insert(struct hashtable *h, void *k, void *v)
 {
-    /* This method allows duplicate keys - but they shouldn't be used */
-    unsigned int index;
-    struct entry *e;
-    if (++(h->entrycount) > h->loadlimit)
+  /* This method allows duplicate keys - but they shouldn't be used */
+  unsigned int index;
+  struct entry *e;
+  ++h->entrycount;
+  if (is_loaded()) 
     {
-        /* Ignore the return value. If expand fails, we should
-         * still try cramming just this value into the existing table
-         * -- we may not have memory for a larger table, but one more
-         * element may be ok. Next time we insert, we'll try expanding again.*/
-        hashtable_expand(h);
+	  /* Ignore the return value. If expand fails, we should
+	   * still try cramming just this value into the existing table
+	   * -- we may not have memory for a larger table, but one more
+	   * element may be ok. Next time we insert, we'll try expanding again.*/
+	  hashtable_expand(h);
+
+	  // bashers:
+	  // Either the thread will have been (1) denied an expand lock,
+	  // or (2) it is the function with the lock, doing the expanding.
+	  //  (1): it'll conditionally wait until table is no longer under load
+	  //  (2): it will increase the load, and is_loaded() will return false
     }
-    e = (struct entry *)malloc(sizeof(struct entry));
-    if (NULL == e) { --(h->entrycount); return 0; } /*oom*/
-    e->h = hash(h,k);
-    index = indexFor(h->tablelength,e->h);
-    e->k = k;
-    e->v = v;
-    e->next = h->table[index];
-    h->table[index] = e;
-    return -1;
+  pthread_rwlock_rdlock(&table_lock);
+  while(is_loaded()) { pthread_cond_wait(&table_loaded, &table_lock); }
+  num_threads--;
+  if(num_threads == 0) signal(&thread_in_table);
+
+  e = (struct entry *)malloc(sizeof(struct entry));
+  if (NULL == e) { --(h->entrycount); return 0; } /*oom*/
+  e->h = hash(h,k);
+  index = indexFor(h->tablelength,e->h);
+  e->k = k;
+  e->v = v;
+  e->next = h->table[index];
+  h->table[index] = e;
+
+  pthread_rwlock_release(&table_lock);
+
+  return -1;
 }
 
 /*****************************************************************************/
 void * /* returns value associated with key */
 hashtable_search(struct hashtable *h, void *k)
 {
-    struct entry *e;
-    unsigned int hashvalue, index;
-    hashvalue = hash(h,k);
-    index = indexFor(h->tablelength,hashvalue);
-    e = h->table[index];
-    while (NULL != e)
+  struct entry *e;
+  unsigned int hashvalue, index;
+  hashvalue = hash(h,k);
+  index = indexFor(h->tablelength,hashvalue);
+  e = h->table[index];
+  while (NULL != e)
     {
-        /* Check hash value to short circuit heavier comparison */
-        if ((hashvalue == e->h) && (h->eqfn(k, e->k))) return e->v;
-        e = e->next;
+	  /* Check hash value to short circuit heavier comparison */
+	  if ((hashvalue == e->h) && (h->eqfn(k, e->k))) return e->v;
+	  e = e->next;
     }
-    return NULL;
+  return NULL;
 }
 
 /*****************************************************************************/
 void * /* returns value associated with key */
 hashtable_remove(struct hashtable *h, void *k)
 {
-    /* TODO: consider compacting the table when the load factor drops enough,
-     *       or provide a 'compact' method. */
+  /* TODO: consider compacting the table when the load factor drops enough,
+   *       or provide a 'compact' method. */
 
-    struct entry *e;
-    struct entry **pE;
-    void *v;
-    unsigned int hashvalue, index;
+  struct entry *e;
+  struct entry **pE;
+  void *v;
+  unsigned int hashvalue, index;
 
-    hashvalue = hash(h,k);
-    index = indexFor(h->tablelength,hash(h,k));
-    pE = &(h->table[index]);
-    e = *pE;
-    while (NULL != e)
+  hashvalue = hash(h,k);
+  index = indexFor(h->tablelength,hash(h,k));
+  pE = &(h->table[index]);
+  e = *pE;
+  while (NULL != e)
     {
-        /* Check hash value to short circuit heavier comparison */
-        if ((hashvalue == e->h) && (h->eqfn(k, e->k)))
+	  /* Check hash value to short circuit heavier comparison */
+	  if ((hashvalue == e->h) && (h->eqfn(k, e->k)))
         {
-            *pE = e->next;
-            h->entrycount--;
-            v = e->v;
-            freekey(e->k);
-            free(e);
-            return v;
+		  *pE = e->next;
+		  h->entrycount--;
+		  v = e->v;
+		  freekey(e->k);
+		  free(e);
+		  return v;
         }
-        pE = &(e->next);
-        e = e->next;
+	  pE = &(e->next);
+	  e = e->next;
     }
-    return NULL;
+  return NULL;
 }
 
 /*****************************************************************************/
@@ -425,29 +458,29 @@ hashtable_remove(struct hashtable *h, void *k)
 void
 hashtable_destroy(struct hashtable *h, int free_values)
 {
-    unsigned int i;
-    struct entry *e, *f;
-    struct entry **table = h->table;
-    if (free_values)
+  unsigned int i;
+  struct entry *e, *f;
+  struct entry **table = h->table;
+  if (free_values)
     {
-        for (i = 0; i < h->tablelength; i++)
+	  for (i = 0; i < h->tablelength; i++)
         {
-            e = table[i];
-            while (NULL != e)
+		  e = table[i];
+		  while (NULL != e)
             { f = e; e = e->next; freekey(f->k); free(f->v); free(f); }
         }
     }
-    else
+  else
     {
-        for (i = 0; i < h->tablelength; i++)
+	  for (i = 0; i < h->tablelength; i++)
         {
-            e = table[i];
-            while (NULL != e)
+		  e = table[i];
+		  while (NULL != e)
             { f = e; e = e->next; freekey(f->k); free(f); }
         }
     }
-    free(h->table);
-    free(h);
+  free(h->table);
+  free(h);
 }
 
 /*
@@ -481,7 +514,7 @@ hashtable_destroy(struct hashtable *h, int free_values)
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 
 /*
@@ -515,18 +548,18 @@ hashtable_destroy(struct hashtable *h, int free_values)
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 struct list_head {
-	struct list_head *next, *prev;
+  struct list_head *next, *prev;
 };
 #define LIST_POISON1  ((void *) 0x00100100)
 #define LIST_POISON2  ((void *) 0x00200200)
 
 #define LIST_HEAD_INIT(name) { &(name), &(name) }
 
-#define LIST_HEAD(name) \
-	struct list_head name = LIST_HEAD_INIT(name)
+#define LIST_HEAD(name)							\
+  struct list_head name = LIST_HEAD_INIT(name)
 
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 /**
@@ -536,14 +569,14 @@ struct list_head {
  * @member:	the name of the member within the struct.
  *
  */
-#define container_of(ptr, type, member) ({			\
-        const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
-        (type *)( (char *)__mptr - offsetof(type,member) );})
+#define container_of(ptr, type, member) ({					\
+	  const typeof( ((type *)0)->member ) *__mptr = (ptr);	\
+	  (type *)( (char *)__mptr - offsetof(type,member) );})
 
 static inline void INIT_LIST_HEAD(struct list_head *list)
 {
-	list->next = list;
-	list->prev = list;
+  list->next = list;
+  list->prev = list;
 }
 
 /*
@@ -553,23 +586,23 @@ static inline void INIT_LIST_HEAD(struct list_head *list)
  * the prev/next entries already!
  */
 static inline void __list_add(struct list_head *new,
-			      struct list_head *prev,
-			      struct list_head *next)
+							  struct list_head *prev,
+							  struct list_head *next)
 {
-	next->prev = new;
-	new->next = next;
-	new->prev = prev;
-	prev->next = new;
+  next->prev = new;
+  new->next = next;
+  new->prev = prev;
+  prev->next = new;
 }
 
 static inline void list_add(struct list_head *new, struct list_head *head)
 {
-	__list_add(new, head, head->next);
+  __list_add(new, head, head->next);
 }
 
 static inline void list_add_tail(struct list_head *new, struct list_head *head)
 {
-	__list_add(new, head->prev, head);
+  __list_add(new, head->prev, head);
 }
 
 /*
@@ -581,8 +614,8 @@ static inline void list_add_tail(struct list_head *new, struct list_head *head)
  */
 static inline void __list_del(struct list_head * prev, struct list_head * next)
 {
-	next->prev = prev;
-	prev->next = next;
+  next->prev = prev;
+  prev->next = next;
 }
 
 /**
@@ -593,9 +626,9 @@ static inline void __list_del(struct list_head * prev, struct list_head * next)
  */
 static inline void list_del(struct list_head *entry)
 {
-	__list_del(entry->prev, entry->next);
-	entry->next = LIST_POISON1;
-	entry->prev = LIST_POISON2;
+  __list_del(entry->prev, entry->next);
+  entry->next = LIST_POISON1;
+  entry->prev = LIST_POISON2;
 }
 
 /**
@@ -604,17 +637,17 @@ static inline void list_del(struct list_head *entry)
  * @type:	the type of the struct this is embedded in.
  * @member:	the name of the list_struct within the struct.
  */
-#define list_entry(ptr, type, member) \
-	container_of(ptr, type, member)
+#define list_entry(ptr, type, member)			\
+  container_of(ptr, type, member)
 
 /**
  * list_for_each	-	iterate over a list
  * @pos:	the &struct list_head to use as a loop counter.
  * @head:	the head for your list.
  */
-#define list_for_each(pos, head) \
-	for (pos = (head)->next; pos != (head); \
-        	pos = pos->next)
+#define list_for_each(pos, head)				\
+  for (pos = (head)->next; pos != (head);		\
+	   pos = pos->next)
 
 
 /**
@@ -623,9 +656,9 @@ static inline void list_del(struct list_head *entry)
  * @n:		another &struct list_head to use as temporary storage
  * @head:	the head for your list.
  */
-#define list_for_each_safe(pos, n, head) \
-	for (pos = (head)->next, n = pos->next; pos != (head); \
-		pos = n, n = pos->next)
+#define list_for_each_safe(pos, n, head)					\
+  for (pos = (head)->next, n = pos->next; pos != (head);	\
+	   pos = n, n = pos->next)
 
 /**
  * list_empty - tests whether a list is empty
@@ -634,7 +667,7 @@ static inline void list_del(struct list_head *entry)
 
 static inline int list_empty(const struct list_head *head)
 {
-	return head->next == head;
+  return head->next == head;
 }
 
 
@@ -675,12 +708,12 @@ struct hashtable * global_index;
 
 int init_index()
 {
- global_index = create_hashtable(1024, hash_from_key_fn, keys_equal_fn);
- if (global_index == NULL) {
-   return(-1);
- } else {
-   return(0);
- }
+  global_index = create_hashtable(1024, hash_from_key_fn, keys_equal_fn);
+  if (global_index == NULL) {
+	return(-1);
+  } else {
+	return(0);
+  }
 }
 
 int insert_into_index(char * word, char * file_name, int line_number)
@@ -691,6 +724,14 @@ int insert_into_index(char * word, char * file_name, int line_number)
   index_instance_t * instance = NULL;
   int error = 0;
   int ret;
+
+  // bashers: index into an array of read/write locks
+  int pthread_index = hash(global_index, word) % sizeof(hash_locks);
+  pthread_rwlock_t hash_lock = hash_locks[pthread_index];
+
+  pthread_rwlock_rdlock(&hash_lock);
+  // ensure table is not in the midst of expanding
+  pthread_wait(&table_change);
 
   old_value = (index_element_t *) hashtable_search(global_index, word);
   if (old_value == NULL) {
@@ -719,7 +760,15 @@ int insert_into_index(char * word, char * file_name, int line_number)
     strncpy(instance->file_name, file_name, MAXPATH);
     instance->line_numbers[instance->next_free++] = line_number;
     list_add(&instance->next, &new_value->instances);
+
+	// bashers: get write permission for lock
+	pthread_rwlock_release(&hash_lock);
+	pthread_rwlock_wrlock(&hash_lock);
+
     ret = hashtable_insert(global_index, new_word, new_value);
+
+	pthread_rwlock_release(&hash_lock);
+
     if (!ret) {
       error = -ENOMEM;
       goto Cleanup;
@@ -734,9 +783,9 @@ int insert_into_index(char * word, char * file_name, int line_number)
     list_for_each(elem, &old_value->instances) {
       old_instance = list_entry(elem, index_instance_t, next);
       if ((strcmp(old_instance->file_name, file_name) == 0) &&
-	  (old_instance->next_free != MAX_LINES)) {
-	old_instance->line_numbers[old_instance->next_free++] = line_number;
-	goto Cleanup;
+		  (old_instance->next_free != MAX_LINES)) {
+		old_instance->line_numbers[old_instance->next_free++] = line_number;
+		goto Cleanup;
       }
     }
     //
@@ -772,21 +821,21 @@ index_search_results_t * find_in_index(char * word)
     list_for_each(next, &element->instances) {
       instance = list_entry(next, index_instance_t, next);
       for (i = 0; i < instance->next_free; i++) {
-	num_results++;
+		num_results++;
       }
     }
 
     results = (index_search_results_t *) calloc(sizeof(index_search_results_t) +
-						(num_results - 1) * sizeof(index_search_elem_t), 1);
+												(num_results - 1) * sizeof(index_search_elem_t), 1);
     if (results != NULL) {
 
       list_for_each(next, &element->instances) {
-	instance = list_entry(next, index_instance_t, next);
-	for (i = 0; i < instance->next_free; i++) {
-	  strcpy(results->results[results->num_results].file_name, instance->file_name);
-	  results->results[results->num_results].line_number = instance->line_numbers[i];
-	  results->num_results++;
-	}
+		instance = list_entry(next, index_instance_t, next);
+		for (i = 0; i < instance->next_free; i++) {
+		  strcpy(results->results[results->num_results].file_name, instance->file_name);
+		  results->results[results->num_results].line_number = instance->line_numbers[i];
+		  results->num_results++;
+		}
       }
     }   
   }

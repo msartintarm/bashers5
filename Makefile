@@ -16,6 +16,9 @@ prog: $(OBJS)
 	gcc $(LDFLAGS) -o $(PROG) $(OBJS) $(LDLIBS) 
 
 run: prog
+	./$(PROG) 10 files/list-of-files.txt
+
+run2: prog
 	./$(PROG) 10 scanfile
 
 valgrind: $(OBJS)

@@ -36,20 +36,29 @@ void error_out(int errnum) {
 
 void exit_main() { buff_free(); }
 
-pthread_mutex_t fill_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t buff_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t not_empty = PTHREAD_COND_INITIALIZER;
+pthread_cond_t not_full = PTHREAD_COND_INITIALIZER;
 
 /**
  * POSIX thread functions to call
  *
- * We will modify these to use atomic variables and / or use the bounded buffer
+ * Synchronization variable logic obtained from here:
+ * http://www.stanford.edu/class/cs140/cgi-bin/lecture.php?topic=locks
  */
 void* scanning_function(void* the_file) {  
 
   int scanning_done = 0;
   while(!scanning_done) {
-	pthread_mutex_lock(&fill_mutex);
-	if(file_scanner((char*)the_file) == 1) scanning_done = 1;
-	pthread_mutex_unlock(&fill_mutex);
+    
+    // Apparently this combination of locks and vars is called a _monitor_.
+    pthread_mutex_lock(&buff_lock);
+    while(is_full()) pthread_cond_wait(&not_full, &buff_lock);
+
+    if(file_scanner((char*)the_file) == 1) scanning_done = 1;
+
+    pthread_cond_signal(&not_empty);
+    pthread_mutex_unlock(&buff_lock);
   }
 
   pthread_exit(0);// (void*) file_scanner("the_file"));
@@ -58,9 +67,11 @@ void* scanning_function(void* the_file) {
 void* indexing_function() {
 
   while(!is_empty()) {
-	pthread_mutex_lock(&fill_mutex);
-	file_indexer();
-	pthread_mutex_unlock(&fill_mutex);
+    pthread_mutex_lock(&buff_lock);
+    while(is_empty()) pthread_cond_wait(&not_empty, &buff_lock);
+    file_indexer();
+    pthread_cond_signal(&not_full);
+    pthread_mutex_unlock(&buff_lock);
   }
 
   pthread_exit(0);// (void*) file_indexer());
@@ -79,16 +90,16 @@ void* searching_function() {
 int main(int argc, char* argv[]) {
 
   // Check for possible errors, which could include:
-  // - wrong number of args
+  // 1. wrong number of args
   if(argc != 3) { error_out(0); }
   int num_threads = atoi(argv[1]);
-  // - not a valid thread count
+  // 2. not a valid thread count
   if(num_threads < 1) { error_out(0); }
-  // - file to read from doesn't exist
+  // 3. file to read from doesn't exist
   if(access(argv[2], R_OK) == -1) { error_out(1); }
 
-  //  index_search_results_t* results;
   init_index();
+  buff_init(20);
 
   // Create the threads we will use..
   pthread_t scanning_thread;
@@ -98,11 +109,11 @@ int main(int argc, char* argv[]) {
   int i;
 
   pthread_create(&scanning_thread, NULL, 
-				 scanning_function, (void*)argv[2]);
+		 scanning_function, (void*)argv[2]);
   atexit(exit_main);
   for(i = 0; i < num_threads; ++i) {
     pthread_create(&indexing_thread[i], NULL, 
-				   indexing_function, NULL);
+		   indexing_function, NULL);
   }
 
   pthread_join(scanning_thread, NULL);
@@ -113,7 +124,7 @@ int main(int argc, char* argv[]) {
 
 
   pthread_create(&searching_thread, NULL,
-				 searching_function, NULL);
+		 searching_function, NULL);
   pthread_join(searching_thread, NULL);
 
   exit(0);

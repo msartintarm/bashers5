@@ -42,10 +42,12 @@ void buff_free() {
 int is_full() {
   return buffer->count == buffer->size; 
 }
+
 //return true if buffer is empty
 int is_empty() {
   return buffer->count == 0;
 }
+
 /**
  * Adds filename from buffer.
  * FIFO
