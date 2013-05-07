@@ -36,15 +36,7 @@ void error_out(int errnum) {
 
 void exit_main() { buff_free(); }
 
-int buf_head = 0;
-int buf_tail = 0;
-const int SIZE = 10;
 pthread_mutex_t fill_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-int fill() { buf_head++; buf_head %= SIZE; return buf_head; }
-int empty() { buf_tail++; buf_tail %= SIZE; return buf_tail; }
-int num_elements() { return (buf_head > buf_tail)?
-	buf_head - buf_tail: SIZE + buf_head - buf_tail; }
 
 /**
  * POSIX thread functions to call
@@ -55,9 +47,9 @@ void* scanning_function(void* the_file) {
 
   int scanning_done = 0;
   while(!scanning_done) {
-	//	pthread_mutex_lock(&fill_mutex);
+	pthread_mutex_lock(&fill_mutex);
 	if(file_scanner((char*)the_file) == 1) scanning_done = 1;
-	//	pthread_mutex_unlock(&fill_mutex);
+	pthread_mutex_unlock(&fill_mutex);
   }
 
   pthread_exit(0);// (void*) file_scanner("the_file"));
@@ -66,14 +58,16 @@ void* scanning_function(void* the_file) {
 void* indexing_function() {
 
   while(!is_empty()) {
+	pthread_mutex_lock(&fill_mutex);
 	file_indexer();
+	pthread_mutex_unlock(&fill_mutex);
   }
 
   pthread_exit(0);// (void*) file_indexer());
 }
 
 void* searching_function() {
-  search_interface();
+  //  search_interface();
   pthread_exit(0);// (void*) search_interface());
 }
 /**
@@ -106,17 +100,17 @@ int main(int argc, char* argv[]) {
   pthread_create(&scanning_thread, NULL, 
 				 scanning_function, (void*)argv[2]);
   atexit(exit_main);
-
-  pthread_join(scanning_thread, NULL);
-
   for(i = 0; i < num_threads; ++i) {
     pthread_create(&indexing_thread[i], NULL, 
 				   indexing_function, NULL);
+  }
+
+  pthread_join(scanning_thread, NULL);
+  for(i = 0; i < num_threads; ++i) {
     pthread_join(indexing_thread[i], NULL);  
   }
-  for(i = 0; i < num_threads; ++i) {
-	//    pthread_join(indexing_thread[i], NULL);
-  }
+
+
 
   pthread_create(&searching_thread, NULL,
 				 searching_function, NULL);
