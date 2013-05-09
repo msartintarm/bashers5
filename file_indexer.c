@@ -57,7 +57,7 @@ return 0;
 	return 0 if false, nonzero if true
 */
 int word_is_valid(char* the_string) {
-  if(strlen(the_string) <= 3) return 0;
+  if(strlen(the_string) < 3) return 0;
   int i;
   for(i=0; i < strlen(the_string); i++){
     int c = (int)the_string[i]; //char at index
