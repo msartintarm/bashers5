@@ -4,7 +4,7 @@
 #include "index.h"
 #include "file_scanner.h"
 #include "bounded_buffer.h"
-
+#include "line_sizer.h"
 int done = 0;
 
 int is_done(){
@@ -38,9 +38,10 @@ int file_indexer() {
   }
   //get filename from buffer
   filename = remove_filename(filename);
+  int max = line_sizer(filename);
   file = fopen(filename, "r");
   if(file == NULL){ return(1); }
-  char buffer[5000000];
+  char buffer[max];
 
   while (!feof(file)) {
 
