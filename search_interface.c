@@ -24,6 +24,8 @@ int search_interface() {
       return 1;
     }
 
+    if(strcmp(in, "\n") == 0) continue;
+
     file = strtok(in, " \n");
     word = strtok(NULL, " \n");
     if(word == NULL){
@@ -50,8 +52,8 @@ int search_interface() {
     	    }else{
     	      sameFile = strcmp(file, result.file_name);
     	      if(sameFile == 0){
-    	        fileNotFound = 0;
-    	        printf("FOUND: %s %d\n", result.file_name, result.line_number + 1);
+  	        	fileNotFound = 0;
+  	        	printf("FOUND: %s %d\n", result.file_name, result.line_number + 1);
   	        }  
 	        }
 	      }
