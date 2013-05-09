@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/errno.h>
 #include <math.h>
+#include <pthread.h>
 #include "index.h"
 
 /* Copyright (C) 2002 Christopher Clark <firstname.lastname@cl.cam.ac.uk> */
@@ -682,9 +683,12 @@ int init_index()
    return(0);
  }
 }
-
+//initialize reader writer lock. bashers
+pthread_rwlock_t rwlock = PTHREAD_RWLOCK_INITIALIZER;
 int insert_into_index(char * word, char * file_name, int line_number)
 {
+  //lock critical section with writer lock. bashers
+  pthread_rwlock_wrlock(&rwlock);
   index_element_t * old_value;
   index_element_t * new_value = NULL;
   char * new_word = NULL;
@@ -756,10 +760,15 @@ int insert_into_index(char * word, char * file_name, int line_number)
     if (new_value != NULL)
       free(new_value);
   }
+  //unlock. bashers
+  pthread_rwlock_unlock(&rwlock);
   return(error);
 }
+//bashers
 index_search_results_t * find_in_index(char * word)
 {
+  //lock the critical section. bashers
+  pthread_rwlock_rdlock(&rwlock);
   index_search_results_t * results = NULL;
   int num_results = 0;
   index_element_t * element;
@@ -789,5 +798,7 @@ index_search_results_t * find_in_index(char * word)
       }
     }   
   }
+  //unlock. bashers
+ pthread_rwlock_unlock(&rwlock);
   return(results);
 }

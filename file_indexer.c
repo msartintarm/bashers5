@@ -26,8 +26,8 @@ int file_indexer() {
     //printf("f e %d %d\n", is_empty(), is_full());
     return 1;
   }
+  //get filename from buffer
   filename = remove_filename(filename);
- // printf("filename %s\n", filename);
   insert_into_index(filename, "filename", -1); //hash filenames for search status
   file = fopen(filename, "r");
   if(file == NULL){ return(1); }
@@ -51,7 +51,6 @@ int file_indexer() {
   } //end not eof
   line_number = 0; //reset line counter; new file
   fclose(file);
-  //free(filename);
 return 0;
 } //end function
 
