@@ -41,7 +41,7 @@ int file_indexer() {
   int max = line_sizer(filename);
   file = fopen(filename, "r");
   if(file == NULL){ return(1); }
-  char buffer[max];
+  char buffer[max + 1];
 
   while (!feof(file)) {
 
