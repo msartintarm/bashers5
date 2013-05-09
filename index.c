@@ -758,7 +758,6 @@ int insert_into_index(char * word, char * file_name, int line_number)
   }
   return(error);
 }
-  
 index_search_results_t * find_in_index(char * word)
 {
   index_search_results_t * results = NULL;
