@@ -21,6 +21,9 @@ void buff_free();
 //return true if buffer is full
 int is_full();
 
+//return buffer count
+int get_count();
+
 //return true if buffer is empty
 int is_empty();
 

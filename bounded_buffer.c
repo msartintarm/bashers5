@@ -26,7 +26,7 @@ void buff_init(int size) {
   buffer->filenames = malloc(size*sizeof(char*)); //MAXPATH = 511
   int i;
   for(i = 0; i < size; ++i) {
-	buffer->filenames[i] = malloc(sizeof(char)); //MAXPATH = 511
+	  buffer->filenames[i] = malloc(sizeof(char)); //MAXPATH = 511
   }
 
   buffer->size  = size;
@@ -42,6 +42,12 @@ void buff_free() {
 int is_full() {
   return buffer->count == buffer->size; 
 }
+
+//return buffer count
+int get_count() {
+  return buffer->count; 
+}
+
 //return true if buffer is empty
 int is_empty() {
   return buffer->count == 0;
@@ -55,10 +61,11 @@ int add_filename(char* fname) {
   int rc = 0;
   int end = (buffer->start + buffer->count) % buffer->size;
   strcpy(buffer->filenames[end], fname); 
-  printf("adding %s at pos %d\n", buffer->filenames[end],
-		 end);
+  //printf("adding %s at pos %d\n", buffer->filenames[end],
+	//	 end);
+	//printf("adding. count is %d\n", buffer->count);
  if (buffer->count == buffer->size) {
-    fprintf(stderr, "Error: can't add to a full buffer\n");
+    //fprintf(stderr, "Error: can't add to a full buffer\n");
     rc = 1;
   }
   else {
@@ -72,9 +79,12 @@ int add_filename(char* fname) {
  * @return filename
  **/
 char* remove_filename(char* fname) {
+  if(is_empty()){
+    fprintf(stderr, "tried to remove from empty buffer\n");
+  }
   fname = buffer->filenames[buffer->start];
-  printf("removing %s at pos %d\n", buffer->filenames[buffer->start],
-		 buffer->start);
+  //printf("removing %s at pos %d\n", buffer->filenames[buffer->start],
+	//	      buffer->start);
   buffer->start = (buffer->start + 1) % buffer->size;
   --buffer->count; //decrement count
   return fname;

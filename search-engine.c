@@ -36,10 +36,13 @@ void error_out(int errnum) {
 
 void exit_main() { buff_free(); }
 
+int list_scanned = 0;
 int buf_head = 0;
 int buf_tail = 0;
 const int SIZE = 10;
 pthread_mutex_t fill_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t full_cv;
+pthread_cond_t empty_cv;
 
 int fill() { buf_head++; buf_head %= SIZE; return buf_head; }
 int empty() { buf_tail++; buf_tail %= SIZE; return buf_tail; }
@@ -52,23 +55,35 @@ int num_elements() { return (buf_head > buf_tail)?
  * We will modify these to use atomic variables and / or use the bounded buffer
  */
 void* scanning_function(void* the_file) {  
-
-  int scanning_done = 0;
-  while(!scanning_done) {
-	//	pthread_mutex_lock(&fill_mutex);
-	if(file_scanner((char*)the_file) == 1) scanning_done = 1;
-	//	pthread_mutex_unlock(&fill_mutex);
+   
+  //int scanning_done = 0;
+  while(!list_scanned) {
+    pthread_mutex_lock(&fill_mutex);
+	  while(is_full()){
+	    pthread_cond_wait(&full_cv, &fill_mutex);
+	  }
+	  //scan a file
+	  if(file_scanner((char*)the_file) == 1) list_scanned = 1;
+	  if(get_count() == 1){
+	    pthread_cond_signal(&empty_cv);
+	  }
+	  pthread_mutex_unlock(&fill_mutex);
   }
-
   pthread_exit(0);// (void*) file_scanner("the_file"));
 }
 
 void* indexing_function() {
 
-  while(!is_empty()) {
-	file_indexer();
+  while(!list_scanned){
+    pthread_mutex_lock(&fill_mutex);
+    while(is_empty()) {
+      pthread_cond_wait(&empty_cv, &fill_mutex);
+    }
+	  file_indexer();
+	  //after consuming one filename there will always be an opening
+	  pthread_cond_signal(&full_cv);
+	  pthread_mutex_unlock(&fill_mutex);
   }
-
   pthread_exit(0);// (void*) file_indexer());
 }
 
@@ -83,7 +98,7 @@ void* searching_function() {
    Once all threads are complete, program will terminate.
 */
 int main(int argc, char* argv[]) {
-
+  buff_init(74); //TODO change this
   // Check for possible errors, which could include:
   // - wrong number of args
   if(argc != 3) { error_out(0); }
@@ -102,25 +117,23 @@ int main(int argc, char* argv[]) {
   pthread_t searching_thread;
 
   int i;
-
+  //run scan thread and index threads concurrently
   pthread_create(&scanning_thread, NULL, 
 				 scanning_function, (void*)argv[2]);
   atexit(exit_main);
-
-  pthread_join(scanning_thread, NULL);
-
+  //start the index threads
   for(i = 0; i < num_threads; ++i) {
     pthread_create(&indexing_thread[i], NULL, 
 				   indexing_function, NULL);
-    pthread_join(indexing_thread[i], NULL);  
   }
-  for(i = 0; i < num_threads; ++i) {
-	//    pthread_join(indexing_thread[i], NULL);
-  }
+  pthread_join(scanning_thread, NULL);
+  /*for(i = 0; i < num_threads; ++i) {
+  	pthread_join(indexing_thread[i], NULL);
+  }*/
 
   pthread_create(&searching_thread, NULL,
 				 searching_function, NULL);
   pthread_join(searching_thread, NULL);
-
-  exit(0);
+  
+  return 0;
 }
