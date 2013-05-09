@@ -4,6 +4,10 @@
 
 int word_is_valid(char* the_string);
 
+int is_done();
+
+void set_done(); 
+
 /**
    2. Takes a buffer containing filenames as input, and goes
    through it, adding all words to index
@@ -15,3 +19,4 @@ int word_is_valid(char* the_string);
 */
 int file_indexer();
 #endif // FILE_INDEXER_H
+

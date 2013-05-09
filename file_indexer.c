@@ -5,6 +5,16 @@
 #include "file_scanner.h"
 #include "bounded_buffer.h"
 
+int done = 0;
+
+int is_done(){
+ return done;
+}
+
+void set_done(){
+ done = 1;
+}
+
 int word_is_valid(char* the_string);
 
 /**
@@ -28,7 +38,6 @@ int file_indexer() {
   }
   //get filename from buffer
   filename = remove_filename(filename);
-  insert_into_index(filename, "filename", -1); //hash filenames for search status
   file = fopen(filename, "r");
   if(file == NULL){ return(1); }
   char buffer[MAXPATH];
@@ -50,6 +59,7 @@ int file_indexer() {
 	line_number = line_number+1;
   } //end not eof
   line_number = 0; //reset line counter; new file
+   insert_into_index(filename, "filename", -1); //hash filenames for search status
   fclose(file);
 return 0;
 } //end function

@@ -9,11 +9,9 @@ int search_interface() {
   char* word;
   char* file;
   int sameFile;
-  int fileNotFound;
-    
+  
   while(1){
     in = (char*)malloc(130);
-    fileNotFound = 1;//This doesn't really work yet.
         
     printf("word:");
     fgets(in, 130, stdin);
@@ -21,7 +19,7 @@ int search_interface() {
     if(feof(stdin)){ 
       free(in);
       printf("END\n");
-      return 1;
+      return 0;
     }
 
     if(strcmp(in, "\n") == 0) continue;
@@ -31,12 +29,19 @@ int search_interface() {
     if(word == NULL){
       word = file;
       file = NULL;
-      fileNotFound = 0;
     }
         
     if(!word_is_valid(word)){
       printf("Word not found.\n");
       continue;
+    }
+    
+    index_search_results_t* file_results;
+    if(file){
+      do {
+        file_results = find_in_index(file);
+      }
+      while(!file_results && !is_done());
     }
     
     index_search_results_t* results = find_in_index(word);
@@ -52,7 +57,6 @@ int search_interface() {
     	    }else{
     	      sameFile = strcmp(file, result.file_name);
     	      if(sameFile == 0){
-  	        	fileNotFound = 0;
   	        	printf("FOUND: %s %d\n", result.file_name, result.line_number + 1);
   	        }  
 	        }
@@ -61,7 +65,7 @@ int search_interface() {
     } else {
   	  printf("Word not found.\n");
     }
-    if(fileNotFound) printf("ERROR: File %s not found\n", file);
+    if(!file_results && file != NULL) printf("ERROR: File %s not found\n", file);
     free(in);
   }
   return 0;

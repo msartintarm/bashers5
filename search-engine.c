@@ -36,6 +36,7 @@ void error_out(int errnum) {
 
 void exit_main() { buff_free(); }
 
+char* sought_file = NULL;
 int num_lines;
 int list_scanned = 0;
 int buf_head = 0;
@@ -88,6 +89,7 @@ void* indexing_function() {
 	  pthread_cond_signal(&full_cv);
 	  pthread_mutex_unlock(&fill_mutex);
   }
+  set_done();
   pthread_exit(0);// (void*) file_indexer());
 }
 
@@ -133,14 +135,15 @@ int main(int argc, char* argv[]) {
     pthread_create(&indexing_thread[i], NULL, 
 				   indexing_function, NULL);
   }
+  pthread_create(&searching_thread, NULL,
+				 searching_function, NULL);
   
   pthread_join(scanning_thread, NULL);
   
   for(i = 0; i < num_threads; ++i) {
   	pthread_join(indexing_thread[i], NULL);
   }
-  pthread_create(&searching_thread, NULL,
-				 searching_function, NULL);
+
   pthread_join(searching_thread, NULL);
   
   return 0;
