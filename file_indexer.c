@@ -28,7 +28,7 @@ int file_indexer() {
   }
   filename = remove_filename(filename);
  // printf("filename %s\n", filename);
-  insert_into_index(filename, "filename", -1);
+  insert_into_index(filename, "filename", -1); //hash filenames for search status
   file = fopen(filename, "r");
   if(file == NULL){ return(1); }
   char buffer[MAXPATH];

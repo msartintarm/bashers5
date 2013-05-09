@@ -15,6 +15,8 @@ struct bounded_buffer {
  */
 int file_scanner(char* filename);
 
+int get_numfiles(char* filename);
+
 //global variable to be shared
 struct bounded_buffer* bnd_buf;
 

@@ -84,7 +84,7 @@ char* remove_filename(char* fname) {
   }
   fname = buffer->filenames[buffer->start];
   //printf("removing %s at pos %d\n", buffer->filenames[buffer->start],
-	//	      buffer->start);
+		     //buffer->start);
   buffer->start = (buffer->start + 1) % buffer->size;
   --buffer->count; //decrement count
   return fname;

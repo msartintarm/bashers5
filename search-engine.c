@@ -36,6 +36,7 @@ void error_out(int errnum) {
 
 void exit_main() { buff_free(); }
 
+int num_lines;
 int list_scanned = 0;
 int buf_head = 0;
 int buf_tail = 0;
@@ -69,17 +70,20 @@ void* scanning_function(void* the_file) {
 	  }
 	  pthread_mutex_unlock(&fill_mutex);
   }
+  //done. wake all threads
+  pthread_cond_broadcast(&empty_cv);
   pthread_exit(0);// (void*) file_scanner("the_file"));
 }
 
 void* indexing_function() {
-
-  while(!list_scanned){
+  while(num_lines > 0) {
+  //while(!list_scanned){
     pthread_mutex_lock(&fill_mutex);
-    while(is_empty()) {
+    while(is_empty() && !list_scanned) {
       pthread_cond_wait(&empty_cv, &fill_mutex);
     }
 	  file_indexer();
+	  num_lines--;
 	  //after consuming one filename there will always be an opening
 	  pthread_cond_signal(&full_cv);
 	  pthread_mutex_unlock(&fill_mutex);
@@ -98,11 +102,14 @@ void* searching_function() {
    Once all threads are complete, program will terminate.
 */
 int main(int argc, char* argv[]) {
-  buff_init(74); //TODO change this
+  
   // Check for possible errors, which could include:
   // - wrong number of args
   if(argc != 3) { error_out(0); }
   int num_threads = atoi(argv[1]);
+  num_lines = get_numfiles(argv[2]);
+  //printf("%d\n", num_lines);
+  buff_init(num_lines);
   // - not a valid thread count
   if(num_threads < 1) { error_out(0); }
   // - file to read from doesn't exist
@@ -126,11 +133,12 @@ int main(int argc, char* argv[]) {
     pthread_create(&indexing_thread[i], NULL, 
 				   indexing_function, NULL);
   }
+  
   pthread_join(scanning_thread, NULL);
-  /*for(i = 0; i < num_threads; ++i) {
+  
+  for(i = 0; i < num_threads; ++i) {
   	pthread_join(indexing_thread[i], NULL);
-  }*/
-
+  }
   pthread_create(&searching_thread, NULL,
 				 searching_function, NULL);
   pthread_join(searching_thread, NULL);
