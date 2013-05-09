@@ -50,7 +50,7 @@ int file_indexer() {
 	  word = strtok_r(buffer, " \n\t", &saveptr);
 	  while (word != NULL){
 	    if(word_is_valid(word)){
-		  printf("buff %s eof %d word %s saveptr%s\n", buffer, feof(file), word, saveptr);
+//		  printf("buff %s eof %d word %s saveptr%s\n", buffer, feof(file), word, saveptr);
 		  if(feof(file)){
 		    break;
 		  }
