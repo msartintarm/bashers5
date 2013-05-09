@@ -40,26 +40,29 @@ int file_indexer() {
   filename = remove_filename(filename);
   file = fopen(filename, "r");
   if(file == NULL){ return(1); }
-  char buffer[MAXPATH];
+  char buffer[5000000];
 
   while (!feof(file)) {
 
-	char * word;
-	char * saveptr;
-	fgets(buffer, sizeof(buffer),file);
-	word = strtok_r(buffer, " \n\t", &saveptr);
-	while (word != NULL){
-	  if(word_is_valid(word)){
-		//printf("%s %s %d\n", filename, word, line_number);
-		insert_into_index(word, filename, line_number);
+	  char * word;
+	  char * saveptr;
+	  fgets(buffer, sizeof(buffer),file);
+	  word = strtok_r(buffer, " \n\t", &saveptr);
+	  while (word != NULL){
+	    if(word_is_valid(word)){
+		  printf("buff %s eof %d word %s saveptr%s\n", buffer, feof(file), word, saveptr);
+		  if(feof(file)){
+		    break;
+		  }
+		  insert_into_index(word, filename, line_number);
+	    }
+	    word = strtok_r(NULL, " \n\t",&saveptr);
 	  }
-	  word = strtok_r(NULL, " \n\t",&saveptr);
-	}
-	//move down a line and increment
-	line_number = line_number+1;
+	  //move down a line and increment
+	  line_number = line_number+1;
   } //end not eof
   line_number = 0; //reset line counter; new file
-   insert_into_index(filename, "filename", -1); //hash filenames for search status
+  insert_into_index(filename, "filename", -1); //hash filenames for search/indexer concurrency
   fclose(file);
 return 0;
 } //end function
